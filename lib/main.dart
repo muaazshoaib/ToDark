@@ -33,15 +33,17 @@ Locale locale = const Locale('en', 'US');
 
 final List appLanguages = [
   {'name': 'العربية', 'locale': const Locale('ar', 'AR')},
+  {'name': 'Deutsch', 'locale': const Locale('de', 'DE')},
   {'name': 'English', 'locale': const Locale('en', 'US')},
   {'name': 'Español', 'locale': const Locale('es', 'ES')},
   {'name': 'Français', 'locale': const Locale('fr', 'FR')},
   {'name': 'Italiano', 'locale': const Locale('it', 'IT')},
   {'name': 'فارسی', 'locale': const Locale('fa', 'IR')},
   {'name': 'Русский', 'locale': const Locale('ru', 'RU')},
+  {'name': 'Tiếng việt', 'locale': const Locale('vi', 'VN')},
+  {'name': 'Türkçe', 'locale': const Locale('tr', 'TR')},
   {'name': '中文', 'locale': const Locale('zh', 'CN')},
   {'name': '中国传统台湾', 'locale': const Locale('zh', 'TW')},
-  {'name': 'Deutsch', 'locale': const Locale('de', 'DE')},
 ];
 
 void main() async {
