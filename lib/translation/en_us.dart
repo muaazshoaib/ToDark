@@ -98,5 +98,9 @@ class EnUs {
         '12': '12-hour',
         '24': '24-hour',
         'select': 'Select',
+        'isImages': 'Show images',
+        'clearText': 'Clear Text',
+        'clearTextWarning':
+            'You have unsaved changes! Are you sure you want to delete them?',
       };
 }

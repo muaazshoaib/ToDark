@@ -94,5 +94,8 @@ class ZhTw {
         '12': '12小時制',
         '24': '24小時制',
         'select': '選擇',
+        'isImages': '顯示圖片',
+        'clearText': '清除文字',
+        'clearTextWarning': '您有未儲存的變更！您確定要刪除它們嗎？',
       };
 }

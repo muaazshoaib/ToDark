@@ -1,5 +1,4 @@
 import 'package:bottom_picker/bottom_picker.dart';
-import 'package:bottom_picker/resources/arrays.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:isar/isar.dart';
@@ -36,19 +35,17 @@ class _TodosActionState extends State<TodosAction> {
   Tasks? selectedTask;
   List<Tasks>? task;
   final FocusNode focusNode = FocusNode();
-  final textConroller = TextEditingController();
-  TextEditingController titleEdit = TextEditingController();
-  TextEditingController descEdit = TextEditingController();
-  TextEditingController timeEdit = TextEditingController();
 
   @override
   initState() {
     if (widget.edit) {
       selectedTask = widget.todo!.task.value;
-      textConroller.text = widget.todo!.task.value!.title;
-      titleEdit = TextEditingController(text: widget.todo!.name);
-      descEdit = TextEditingController(text: widget.todo!.description);
-      timeEdit = TextEditingController(
+      todoController.textTodoConroller.text = widget.todo!.task.value!.title;
+      todoController.titleTodoEdit =
+          TextEditingController(text: widget.todo!.name);
+      todoController.descTodoEdit =
+          TextEditingController(text: widget.todo!.description);
+      todoController.timeTodoEdit = TextEditingController(
           text: widget.todo!.todoCompletedTime != null
               ? timeformat == '12'
                   ? DateFormat.yMMMEd(locale.languageCode)
@@ -62,7 +59,7 @@ class _TodosActionState extends State<TodosAction> {
     super.initState();
   }
 
-  Future<List<Tasks>> getTodosAll(String pattern) async {
+  Future<List<Tasks>> getTaskAll(String pattern) async {
     List<Tasks> getTask;
     getTask = isar.tasks.filter().archiveEqualTo(false).findAllSync();
     return getTask.where((element) {
@@ -98,12 +95,51 @@ class _TodosActionState extends State<TodosAction> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      onPressed: () {
-                        titleEdit.clear();
-                        descEdit.clear();
-                        timeEdit.clear();
-                        textConroller.clear();
-                        Get.back();
+                      onPressed: () async {
+                        if (todoController.titleTodoEdit.text.length >= 20 ||
+                            todoController.descTodoEdit.text.length >= 20) {
+                          await showAdaptiveDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog.adaptive(
+                                title: Text(
+                                  'clearText'.tr,
+                                  style: context.textTheme.titleLarge,
+                                ),
+                                content: Text('clearTextWarning'.tr,
+                                    style: context.textTheme.titleMedium),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () => Get.back(result: false),
+                                      child: Text('cancel'.tr,
+                                          style: context
+                                              .theme.textTheme.titleMedium
+                                              ?.copyWith(
+                                                  color: Colors.blueAccent))),
+                                  TextButton(
+                                      onPressed: () {
+                                        todoController.titleTodoEdit.clear();
+                                        todoController.descTodoEdit.clear();
+                                        todoController.timeTodoEdit.clear();
+                                        todoController.textTodoConroller
+                                            .clear();
+                                        Get.back(result: true);
+                                      },
+                                      child: Text('delete'.tr,
+                                          style: context
+                                              .theme.textTheme.titleMedium
+                                              ?.copyWith(color: Colors.red))),
+                                ],
+                              );
+                            },
+                          );
+                        } else {
+                          todoController.titleTodoEdit.clear();
+                          todoController.descTodoEdit.clear();
+                          todoController.timeTodoEdit.clear();
+                          todoController.textTodoConroller.clear();
+                          Get.back();
+                        }
                       },
                       icon: const Icon(
                         Iconsax.close_square,
@@ -117,43 +153,60 @@ class _TodosActionState extends State<TodosAction> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    IconButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          textTrim(titleEdit);
-                          textTrim(descEdit);
-                          widget.edit
-                              ? todoController.updateTodo(
-                                  widget.todo!,
-                                  selectedTask!,
-                                  titleEdit.text,
-                                  descEdit.text,
-                                  timeEdit.text,
-                                )
-                              : widget.category
-                                  ? todoController.addTodo(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        widget.edit
+                            ? IconButton(
+                                onPressed: () {
+                                  todoController.updateTodoFix(widget.todo!);
+                                  setState(() {});
+                                },
+                                icon: const Icon(
+                                  Iconsax.attach_square,
+                                  size: 20,
+                                ),
+                              )
+                            : const Offstage(),
+                        IconButton(
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              textTrim(todoController.titleTodoEdit);
+                              textTrim(todoController.descTodoEdit);
+                              widget.edit
+                                  ? todoController.updateTodo(
+                                      widget.todo!,
                                       selectedTask!,
-                                      titleEdit.text,
-                                      descEdit.text,
-                                      timeEdit.text,
+                                      todoController.titleTodoEdit.text,
+                                      todoController.descTodoEdit.text,
+                                      todoController.timeTodoEdit.text,
                                     )
-                                  : todoController.addTodo(
-                                      widget.task!,
-                                      titleEdit.text,
-                                      descEdit.text,
-                                      timeEdit.text,
-                                    );
-                          textConroller.clear();
-                          titleEdit.clear();
-                          descEdit.clear();
-                          timeEdit.clear();
-                          Get.back();
-                        }
-                      },
-                      icon: const Icon(
-                        Iconsax.tick_square,
-                        size: 20,
-                      ),
+                                  : widget.category
+                                      ? todoController.addTodo(
+                                          selectedTask!,
+                                          todoController.titleTodoEdit.text,
+                                          todoController.descTodoEdit.text,
+                                          todoController.timeTodoEdit.text,
+                                        )
+                                      : todoController.addTodo(
+                                          widget.task!,
+                                          todoController.titleTodoEdit.text,
+                                          todoController.descTodoEdit.text,
+                                          todoController.timeTodoEdit.text,
+                                        );
+                              todoController.textTodoConroller.clear();
+                              todoController.titleTodoEdit.clear();
+                              todoController.descTodoEdit.clear();
+                              todoController.timeTodoEdit.clear();
+                              Get.back();
+                            }
+                          },
+                          icon: const Icon(
+                            Iconsax.tick_square,
+                            size: 20,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -161,7 +214,7 @@ class _TodosActionState extends State<TodosAction> {
               widget.category
                   ? RawAutocomplete<Tasks>(
                       focusNode: focusNode,
-                      textEditingController: textConroller,
+                      textEditingController: todoController.textTodoConroller,
                       fieldViewBuilder: (BuildContext context,
                           TextEditingController fieldTextEditingController,
                           FocusNode fieldFocusNode,
@@ -171,19 +224,20 @@ class _TodosActionState extends State<TodosAction> {
                           margin: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           onChanged: (value) => setState(() {}),
-                          controller: textConroller,
+                          controller: todoController.textTodoConroller,
                           focusNode: focusNode,
                           labelText: 'selectCategory'.tr,
                           type: TextInputType.text,
                           icon: const Icon(Iconsax.folder_2),
-                          iconButton: textConroller.text.isNotEmpty
+                          iconButton: todoController
+                                  .textTodoConroller.text.isNotEmpty
                               ? IconButton(
                                   icon: const Icon(
                                     Icons.close,
                                     size: 18,
                                   ),
                                   onPressed: () {
-                                    textConroller.clear();
+                                    todoController.textTodoConroller.clear();
                                     setState(() {});
                                   },
                                 )
@@ -200,10 +254,10 @@ class _TodosActionState extends State<TodosAction> {
                         if (textEditingValue.text.isEmpty) {
                           return const Iterable<Tasks>.empty();
                         }
-                        return getTodosAll(textEditingValue.text);
+                        return getTaskAll(textEditingValue.text);
                       },
                       onSelected: (Tasks selection) {
-                        textConroller.text = selection.title;
+                        todoController.textTodoConroller.text = selection.title;
                         selectedTask = selection;
                         focusNode.unfocus();
                       },
@@ -252,10 +306,15 @@ class _TodosActionState extends State<TodosAction> {
               MyTextForm(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                controller: titleEdit,
+                controller: todoController.titleTodoEdit,
                 labelText: 'name'.tr,
                 type: TextInputType.multiline,
                 icon: const Icon(Iconsax.edit_2),
+                onChanged: (text) {
+                  setState(() {
+                    todoController.titleTodoEdit.text = text;
+                  });
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'validateName'.tr;
@@ -267,29 +326,38 @@ class _TodosActionState extends State<TodosAction> {
               MyTextForm(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                controller: descEdit,
+                controller: todoController.descTodoEdit,
                 labelText: 'description'.tr,
                 type: TextInputType.multiline,
                 icon: const Icon(Iconsax.note_text),
                 maxLine: null,
+                onChanged: (text) {
+                  setState(() {
+                    todoController.descTodoEdit.text = text;
+                  });
+                },
               ),
               MyTextForm(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                onChanged: (value) => setState(() {}),
+                onChanged: (text) {
+                  setState(() {
+                    todoController.timeTodoEdit.text = text;
+                  });
+                },
                 readOnly: true,
-                controller: timeEdit,
+                controller: todoController.timeTodoEdit,
                 labelText: 'timeComplete'.tr,
                 type: TextInputType.datetime,
                 icon: const Icon(Iconsax.clock),
-                iconButton: timeEdit.text.isNotEmpty
+                iconButton: todoController.timeTodoEdit.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(
                           Icons.close,
                           size: 18,
                         ),
                         onPressed: () {
-                          timeEdit.clear();
+                          todoController.timeTodoEdit.clear();
                           setState(() {});
                         },
                       )
@@ -301,12 +369,15 @@ class _TodosActionState extends State<TodosAction> {
                       'time'.tr,
                       style: context.textTheme.titleMedium!,
                     ),
-                    pickerDescription: Text(
-                      'timeDesc'.tr,
-                      style: context.textTheme.labelLarge!
-                          .copyWith(color: Colors.grey),
+                    pickerDescription: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'timeDesc'.tr,
+                        style: context.textTheme.labelLarge!
+                            .copyWith(color: Colors.grey),
+                      ),
                     ),
-                    titleAlignment: Alignment.center,
+                    titleAlignment: Alignment.centerLeft,
                     pickerTextStyle:
                         context.textTheme.labelMedium!.copyWith(fontSize: 15),
                     closeIconColor: Colors.red,
@@ -319,14 +390,17 @@ class _TodosActionState extends State<TodosAction> {
                           : DateFormat.yMMMEd(locale.languageCode)
                               .add_Hm()
                               .format(date);
-                      timeEdit.text = formattedDate;
+                      todoController.timeTodoEdit.text = formattedDate;
                       setState(() {});
                     },
                     buttonContent: Text(
                       'select'.tr,
                       textAlign: TextAlign.center,
                     ),
-                    bottomPickerTheme: BottomPickerTheme.blue,
+                    buttonStyle: BoxDecoration(
+                      color: context.theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     minDateTime: DateTime.now(),
                     maxDateTime: DateTime.now().add(const Duration(days: 1000)),
                     initialDateTime: DateTime.now(),

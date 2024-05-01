@@ -22,6 +22,15 @@ class TodoController extends GetxController {
   final duration = const Duration(milliseconds: 500);
   var now = DateTime.now();
 
+  TextEditingController titleCategoryEdit = TextEditingController();
+  TextEditingController descCategoryEdit = TextEditingController();
+
+  TextEditingController textTodoConroller = TextEditingController();
+  TextEditingController transferTodoConroller = TextEditingController();
+  TextEditingController titleTodoEdit = TextEditingController();
+  TextEditingController descTodoEdit = TextEditingController();
+  TextEditingController timeTodoEdit = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -204,6 +213,18 @@ class TodoController extends GetxController {
     todos.refresh();
   }
 
+  Future<void> updateTodoFix(Todos todo) async {
+    isar.writeTxnSync(() {
+      todo.fix = todo.fix == true ? false : true;
+      isar.todos.putSync(todo);
+    });
+
+    var newTodo = todo;
+    int oldIdx = todos.indexOf(todo);
+    todos[oldIdx] = newTodo;
+    todos.refresh();
+  }
+
   Future<void> updateTodo(
       Todos todo, Tasks task, String title, String desc, String time) async {
     DateTime? date;
@@ -237,6 +258,27 @@ class TodoController extends GetxController {
     } else {
       await flutterLocalNotificationsPlugin.cancel(todo.id);
     }
+    EasyLoading.showSuccess('updateTodo'.tr, duration: duration);
+  }
+
+  Future<void> transferTodos(List<Todos> todoList, Tasks task) async {
+    List<Todos> todoListCopy = List.from(todoList);
+
+    for (var todo in todoListCopy) {
+      isar.writeTxnSync(() {
+        todo.task.value = task;
+        isar.todos.putSync(todo);
+        todo.task.saveSync();
+      });
+
+      var newTodo = todo;
+      int oldIdx = todos.indexOf(todo);
+      todos[oldIdx] = newTodo;
+    }
+
+    todos.refresh();
+    tasks.refresh();
+
     EasyLoading.showSuccess('updateTodo'.tr, duration: duration);
   }
 

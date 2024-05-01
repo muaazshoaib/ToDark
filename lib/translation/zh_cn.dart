@@ -94,5 +94,8 @@ class ZhCN {
         '12': '12小时制',
         '24': '24小时制',
         'select': '选择',
+        'isImages': '显示图片',
+        'clearText': '清除文本',
+        'clearTextWarning': '您有未保存的更改！您确定要删除它们吗？',
       };
 }

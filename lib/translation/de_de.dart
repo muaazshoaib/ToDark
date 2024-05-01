@@ -99,5 +99,9 @@ class DeDe {
         '12': '12-stunden',
         '24': '24-stunden',
         'select': 'Auswählen',
+        'isImages': 'Bilder anzeigen',
+        'clearText': 'Text löschen',
+        'clearTextWarning':
+            'Sie haben ungespeicherte Änderungen! Möchten Sie sie wirklich löschen?',
       };
 }

@@ -99,5 +99,9 @@ class ItIt {
         '12': '12 ore',
         '24': '24 ore',
         'select': 'Seleziona',
+        'isImages': 'Mostra immagini',
+        'clearText': 'Cancella testo',
+        'clearTextWarning':
+            'Hai delle modifiche non salvate! Sei sicuro di volerle eliminare?',
       };
 }
